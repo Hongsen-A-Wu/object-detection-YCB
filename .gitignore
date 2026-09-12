@@ -1,0 +1,19 @@
+# Dataset
+classification_dataset_split/
+data/
+test/
+
+# Models
+*.keras
+*.h5
+*.tflite
+
+# Python
+__pycache__/
+*.pyc
+
+# macOS
+.DS_Store
+
+# VS Code
+.vscode/
