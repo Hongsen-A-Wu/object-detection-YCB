@@ -1,43 +1,65 @@
 """
-
+Epoch: 1 Loss: 1.4798945 Accuracy: 0.52292824 Val Loss: 3.9499328 Val Accuracy: 0.06536165
+Epoch: 2 Loss: 0.579632 Accuracy: 0.81633246 Val Loss: 4.6220136 Val Accuracy: 0.14100863
+Epoch: 3 Loss: 0.34015065 Accuracy: 0.893525 Val Loss: 4.8753796 Val Accuracy: 0.2080292
+Epoch: 4 Loss: 0.22561032 Accuracy: 0.9307079 Val Loss: 5.244522 Val Accuracy: 0.17186463
+Test Loss: 6.998564 Test Accuracy: 0.15922494
 """
 
 import tensorflow as tf
 
 # Load YCB training dataset
-train_dataset_path = "/Volumes/AIR_DISK/training-data/object-detection-YCB/classification_dataset_split/train"
-test_dataset_path =  "/Volumes/AIR_DISK/training-data/object-detection-YCB/classification_dataset_split/test"
-validation_dataset_path = "/Volumes/AIR_DISK/training-data/object-detection-YCB/classification_dataset_split/validation"
-
+train_dataset_path = (
+    "/Volumes/AIR_DISK/training-data/object-detection-YCB/"
+    "classification_dataset_split/train")
+validation_dataset_path = (
+    "/Volumes/AIR_DISK/training-data/object-detection-YCB/"
+    "classification_dataset_split/validation"
+)
+test_dataset_path =  (
+    "/Volumes/AIR_DISK/training-data/object-detection-YCB/"
+    "classification_test_dataset"
+)
 
 train_data = tf.keras.utils.image_dataset_from_directory(
     train_dataset_path,
     image_size = (320,320), # (height,width)
-    batch_size = 32,
+    batch_size = 16,
     shuffle = True
-) # The shape of x_batch is (32,320,320,3), where 3 represents RGB 3 colors
+) # The shape of x_batch is (batch_size,320,320,3), where 3 represents RGB 3 colors
 
 class_names = train_data.class_names
-
-test_data = tf.keras.utils.image_dataset_from_directory(
-    test_dataset_path,
-    image_size = (320,320), # (height,width)
-    batch_size = 32,
-    shuffle=False,
-    class_names=class_names
-)
 
 validation_data = tf.keras.utils.image_dataset_from_directory(
     validation_dataset_path,
     image_size=(320, 320),
-    batch_size=32,
+    batch_size=16,
     shuffle=False,
     class_names=class_names
 )
 
+test_data = tf.keras.utils.image_dataset_from_directory(
+    test_dataset_path,
+    image_size = (320,320), # (height,width)
+    batch_size = 16,
+    shuffle=False,
+    class_names=class_names
+)
+
+# Data Augmentation
+data_augmentation = tf.keras.Sequential([
+    tf.keras.layers.RandomFlip("horizontal"),
+    tf.keras.layers.RandomRotation(0.1),
+    tf.keras.layers.RandomZoom(0.1),
+    tf.keras.layers.RandomContrast(0.2),
+])
+
 # Define model
 model = tf.keras.Sequential([
     tf.keras.layers.Input(shape=(320,320,3)),
+    
+    # Augmentation
+    data_augmentation,
     
     # Normalization
     tf.keras.layers.Rescaling(1.0/255.0),
@@ -49,46 +71,47 @@ model = tf.keras.Sequential([
     tf.keras.layers.Conv2D(
         filters = 32,
         kernel_size = 3,
-        activation = "relu",
         padding = "same",
         kernel_initializer = tf.keras.initializers.HeNormal(seed=1),
         use_bias = True
-    ), # (32,320，320，32)
+    ), # (16,320，320，32)
     
     tf.keras.layers.MaxPooling2D(
         pool_size = 2
-    ), # (32,160,160,32)
+    ), # (16,160,160,32)
     
     # CNN 2
     tf.keras.layers.Conv2D(
         filters = 64,
         kernel_size = 3,
-        activation = "relu",
         padding = "same",
         kernel_initializer = tf.keras.initializers.HeNormal(seed=1),
         use_bias = True
-    ), # (32,160，160，64)
+    ), # (16,160，160，64)
+
+    tf.keras.layers.BatchNormalization(),
+
+    tf.keras.layers.ReLU(),
 
     tf.keras.layers.MaxPooling2D(
         pool_size = 2
-    ), # (32,80,80,64)
+    ), # (16,80,80,64)
     
     # CNN 3
     tf.keras.layers.Conv2D(
         filters = 128,
         kernel_size = 3,
-        activation = "relu",
         padding = "same",
         kernel_initializer = tf.keras.initializers.HeNormal(seed=1),
         use_bias = True
-    ), # (32,80，80，128)
+    ), # (16,80，80，128)
 
     tf.keras.layers.MaxPooling2D(
         pool_size = 2
-    ), # (32,40,40,128)
+    ), # (16,40,40,128)
     
     # Global_pool
-    # (32,128)
+    # (16,128)
     tf.keras.layers.GlobalAveragePooling2D(),
     
     # Dense 1
@@ -97,6 +120,8 @@ model = tf.keras.Sequential([
         activation="relu",
         kernel_initializer=tf.keras.initializers.HeNormal(seed=1)
     ),
+    # Dropout
+    tf.keras.layers.Dropout(0.5),
     
     # Dense 2
     tf.keras.layers.Dense(
@@ -104,6 +129,8 @@ model = tf.keras.Sequential([
         activation="relu",
         kernel_initializer=tf.keras.initializers.HeNormal(seed=1)
     ),
+    # Dropout
+    tf.keras.layers.Dropout(0.3),
         
     # Output
     tf.keras.layers.Dense(
