@@ -1,9 +1,9 @@
 """
-Epoch: 1 Loss: 1.4798945 Accuracy: 0.52292824 Val Loss: 3.9499328 Val Accuracy: 0.06536165
-Epoch: 2 Loss: 0.579632 Accuracy: 0.81633246 Val Loss: 4.6220136 Val Accuracy: 0.14100863
-Epoch: 3 Loss: 0.34015065 Accuracy: 0.893525 Val Loss: 4.8753796 Val Accuracy: 0.2080292
-Epoch: 4 Loss: 0.22561032 Accuracy: 0.9307079 Val Loss: 5.244522 Val Accuracy: 0.17186463
-Test Loss: 6.998564 Test Accuracy: 0.15922494
+Epoch: 1 Loss: 2.8424022 Accuracy: 0.12244392 Val Loss: 2.7537029 Val Accuracy: 0.1558551
+Epoch: 2 Loss: 2.3752065 Accuracy: 0.24056391 Val Loss: 2.8517673 Val Accuracy: 0.14532435
+Epoch: 3 Loss: 2.0518649 Accuracy: 0.3460499 Val Loss: 2.6445508 Val Accuracy: 0.16933446
+Epoch: 4 Loss: 1.7996686 Accuracy: 0.43056932 Val Loss: 2.7865498 Val Accuracy: 0.15711878
+Test Loss: 1.7745596 Test Accuracy: 0.4466645
 """
 
 import tensorflow as tf
